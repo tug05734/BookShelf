@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">BookCase</string>
+    <string-array name="books">
+        <item>More Than This</item>
+        <item>I Let You Go</item>
+        <item>The Shadow of the Wind</item>
+        <item>Harry Potter and the Chamber of Secrets</item>
+        <item>Harry Potter and the Prisoner of Azkaban</item>
+        <item>Harry Potter and the Goblet of Fire</item>
+        <item>Harry Potter and the Order of the Phoenix</item>
+        <item>Harry Potter and the Half Blood Prince</item>
+        <item>Harry Potter and the Deathly Hallows</item>
+        <item>Looking for Alaska</item>
+    </string-array>
+</resources>
