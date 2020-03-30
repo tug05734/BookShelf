@@ -18,7 +18,7 @@ public class ViewPagerFragment extends Fragment {
     private String book, title, author;
     TextView tv, tv1;
 
-    //This class is not used 
+    //This class is not used
 
     public ViewPagerFragment(){
     }
