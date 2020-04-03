@@ -14,6 +14,7 @@ public class BookDetailsFragment extends Fragment{
     private static final String BOOK_TITLE = "key";
     private static final String TITLE = "title";
     private static final String AUTHOR = "author";
+    private static Book books;
     private String book, title, author;
     TextView tv, tv1;
     private BookDetailsFragmentListener bd;
@@ -30,11 +31,11 @@ public class BookDetailsFragment extends Fragment{
         return fragment;
     }
 
-    public static ViewPagerFragment newInstance(String title){ //Old code disregard
-        ViewPagerFragment fragment = new ViewPagerFragment();
-       // Bundle bundle = new Bundle();
-        //bundle.putString(BOOK_TITLE, title);
-        //fragment.setArguments(bundle);
+    public static BookDetailsFragment newInstanced(Book book){ //Old code disregard
+        BookDetailsFragment fragment = new BookDetailsFragment();
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(BOOK_TITLE, book);
+        fragment.setArguments(bundle);
         return fragment;
     }
 
@@ -43,9 +44,10 @@ public class BookDetailsFragment extends Fragment{
         super.onCreate(savedInstanceState);
         Log.d("hello", "made it");
         if(getArguments() != null){
-            book = getArguments().getString(BOOK_TITLE);
-            title = getArguments().getString(TITLE);
-            author = getArguments().getString(AUTHOR);
+            books = getArguments().getParcelable(BOOK_TITLE);
+           // book = getArguments().getString(BOOK_TITLE);
+            //title = getArguments().getString(TITLE);
+            //author = getArguments().getString(AUTHOR);
         }
     }
 
@@ -54,8 +56,8 @@ public class BookDetailsFragment extends Fragment{
         ViewGroup view = (ViewGroup) inflater.inflate(R.layout.book_details_fragment_activity, container, false);
         tv = view.findViewById(R.id.book_title);
         tv1 = view.findViewById(R.id.book_author);
-        tv.setText(title);
-        tv1.setText(author);
+        tv.setText(books.getTitle());
+        tv1.setText(books.getAuthor());
         return view;
     }
 
@@ -81,7 +83,7 @@ public class BookDetailsFragment extends Fragment{
 
 
     public interface BookDetailsFragmentListener{
-        void displayBook(String title, String author);
+        void displayBook(Book book);
     }
 
 }

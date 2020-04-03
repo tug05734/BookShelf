@@ -8,9 +8,8 @@ public class Book implements Parcelable {
     private int id, published;
     private String title, author, coverURL;
 
-    public Book(int id, int published, String title, String author, String coverURL){
+    public Book(int id, String title, String author, String coverURL){
         this.id = id;
-        this.published = published;
         this.title = title;
         this.author = author;
         this.coverURL = coverURL;

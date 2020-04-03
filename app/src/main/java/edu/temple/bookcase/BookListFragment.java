@@ -22,12 +22,13 @@ import java.util.Iterator;
 
 public class BookListFragment extends Fragment {
 
-    private ArrayList<String> books;
+    //private ArrayList<String> books;
     private static final String BOOK_LIST = "key";
     private static final String TITLE = "title";
     private static final String AUTHOR = "author";
     private static final String HASHMAP = "hashmap";
     ArrayList<HashMap<Integer, String>> newBooks = new ArrayList<>();
+    ArrayList<Book> books;
     String book, title, author;
     ListView listView;
     private BookListFragmentListener bl;
@@ -48,10 +49,10 @@ public class BookListFragment extends Fragment {
         return blFragment;
     }
 
-    public static BookListFragment newInstanced(ArrayList<String> books){ //Old code disregard
+    public static BookListFragment newInstanced(ArrayList<Book> books){ //Old code disregard
         BookListFragment blFragment = new BookListFragment();
         Bundle bundle = new Bundle();
-        bundle.putStringArrayList(BOOK_LIST, books);
+        bundle.putParcelableArrayList(BOOK_LIST, books);
         blFragment.setArguments(bundle);
         return blFragment;
     }
@@ -60,10 +61,10 @@ public class BookListFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         if(getArguments() != null){
-            books = getArguments().getStringArrayList(BOOK_LIST);
+            books = getArguments().getParcelableArrayList(BOOK_LIST);
             //title = getArguments().getString(TITLE);
             //author = getArguments().getString(AUTHOR);
-            newBooks = (ArrayList<HashMap<Integer, String>>)getArguments().getSerializable(HASHMAP); //Stores the hashmap from bundle to newBooks
+           // newBooks = (ArrayList<HashMap<Integer, String>>)getArguments().getSerializable(HASHMAP); //Stores the hashmap from bundle to newBooks
             Log.d("hello", "It got here 3");
         }
     }
@@ -71,15 +72,15 @@ public class BookListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
         ViewGroup view = (ViewGroup) inflater.inflate(R.layout.book_list_fragment_activity, container, false);
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter(view.getContext(), android.R.layout.simple_list_item_2, android.R.id.text1 ,newBooks){
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter(view.getContext(), android.R.layout.simple_list_item_2, android.R.id.text1 ,books){
             @Override
             public View getView(int position, View convertView, ViewGroup parent){ //Populates the list view with the book details from the hashmap
                 View view = super.getView(position,convertView, parent);
                 TextView text1 = (TextView) view.findViewById(android.R.id.text1);
                 TextView text2 = (TextView) view.findViewById(android.R.id.text2);
                 Log.d("hello", "It got here 4");
-                text1.setText(newBooks.get(position).get(1));
-                text2.setText(newBooks.get(position).get(2));
+                text1.setText(books.get(position).getTitle());
+                text2.setText(books.get(position).getAuthor());
                 Log.d("hello", "It got here 5");
                /* while(newBooks.iterator().hasNext()){
                     text1.setText(newBooks.get(i).get(1));
@@ -99,7 +100,7 @@ public class BookListFragment extends Fragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                bl.selectedBook(newBooks.get(i).get(1), newBooks.get(i).get(2)); //When user clicks on listview element
+                bl.selectedBook(books.get(i)); //When user clicks on listview element
             }
         });
 
@@ -125,6 +126,6 @@ public class BookListFragment extends Fragment {
 
 
     public interface BookListFragmentListener{
-        void selectedBook(String title, String author);
+        void selectedBook(Book book);
     }
 }

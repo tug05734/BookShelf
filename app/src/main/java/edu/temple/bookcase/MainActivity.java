@@ -23,6 +23,7 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
     private ViewPager vp;
     ArrayList<HashMap<Integer, String>> newBooks = new ArrayList<>();
     ArrayList<String> books;
+    ArrayList<Book> test = new ArrayList<Book>();
     private PagerAdapter pa;
     private boolean isPortrait;
 
@@ -30,6 +31,7 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Log.d("hello", "It got here 11");
         newBooks.add(createHashMap("Red Book","Diego Forlan"));
         newBooks.add(createHashMap("Blue Book", "Messi"));
         newBooks.add(createHashMap("Green Book","Ronaldo"));
@@ -40,17 +42,19 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
         newBooks.add(createHashMap("Brown Book", "Carson Wentz"));
         newBooks.add(createHashMap("Teal Book","Michael Vick"));
         newBooks.add(createHashMap("Neon Book", "Nick Foles"));
+        test.add(createBook("book1", "author1"));
+        test.add(createBook("book2", "author2"));
         books = new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.books)));
         if (checkTablet() || getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             Log.d("hello", "It got here 1");
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.book_list_view, BookListFragment.newInstance(newBooks))
-                    .replace(R.id.book_details_view, BookDetailsFragment.newInstance(""))
+                    .replace(R.id.book_list_view, BookListFragment.newInstanced(test))
+                    .replace(R.id.book_details_view, BookDetailsFragment.newInstanced(test.get(0)))
                     .commit();
         } else {
             isPortrait = true;
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.layout, BookListFragment.newInstance(newBooks))
+                    .replace(R.id.layout, BookListFragment.newInstanced(test))
                     .commit();
         }
     }
@@ -68,11 +72,11 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
 
     //Method that will display chosen book in a BookDetailsFragment
     @Override
-    public void displayBook(String title, String author) {
+    public void displayBook(Book book) {
         if (checkTablet() || getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) { //Checks to see if in landscape mode/tablet or portrait
             Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.book_details_view);
             if (fragment != null && fragment.getView() != null) {
-                getSupportFragmentManager().beginTransaction().replace(R.id.book_details_view, BookDetailsFragment.newInstance(title, author)).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.book_details_view, BookDetailsFragment.newInstanced(book)).commit();
 
             /*    TextView tv = fragment.getView().findViewById(R.id.book_title);
                 TextView tv1 = fragment.getView().findViewById(R.id.book_author);
@@ -85,13 +89,13 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
             }
         } else{
             Log.d("hello", "got here");
-            getSupportFragmentManager().beginTransaction().replace(R.id.layout, BookDetailsFragment.newInstance(title, author)).addToBackStack(null).commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.layout, BookDetailsFragment.newInstanced(book)).addToBackStack(null).commit();
         }
     }
 
     @Override
-    public void selectedBook(String title, String author) {
-        displayBook(title, author);
+    public void selectedBook(Book book) {
+        displayBook(book);
     }
 
     private class SliderAdapter extends FragmentStatePagerAdapter {
@@ -119,6 +123,11 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
         hm.put(1, title);
         hm.put(2, author);
         return hm;
+    }
+
+    public Book createBook(String title, String author){
+        Book book = new Book(0, title, author, "url");
+        return book;
     }
 }
 
