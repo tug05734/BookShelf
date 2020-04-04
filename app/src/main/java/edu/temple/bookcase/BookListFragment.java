@@ -37,18 +37,6 @@ public class BookListFragment extends Fragment {
 
     }
 
-    //creates new instance of BookListFragment
-    public static BookListFragment newInstance(ArrayList<HashMap<Integer, String>> hm){
-        Log.d("hello", "It got here 2");
-        BookListFragment blFragment = new BookListFragment();
-        Bundle bundle = new Bundle();
-        bundle.putSerializable(HASHMAP, (Serializable) hm);
-       // bundle.putString(TITLE, hm.get(0).get(1));
-        //bundle.putString(AUTHOR, hm.get(2));
-        blFragment.setArguments(bundle);
-        return blFragment;
-    }
-
     public static BookListFragment newInstanced(ArrayList<Book> books){ //Old code disregard
         BookListFragment blFragment = new BookListFragment();
         Bundle bundle = new Bundle();

@@ -32,16 +32,6 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Log.d("hello", "It got here 11");
-        newBooks.add(createHashMap("Red Book","Diego Forlan"));
-        newBooks.add(createHashMap("Blue Book", "Messi"));
-        newBooks.add(createHashMap("Green Book","Ronaldo"));
-        newBooks.add(createHashMap("Yellow Book", "Wesley Sneijder"));
-        newBooks.add(createHashMap("Black Book","Chase Utley"));
-        newBooks.add(createHashMap("Pink Book", "Cliff Lee"));
-        newBooks.add(createHashMap("White Book","Ryan Howard"));
-        newBooks.add(createHashMap("Brown Book", "Carson Wentz"));
-        newBooks.add(createHashMap("Teal Book","Michael Vick"));
-        newBooks.add(createHashMap("Neon Book", "Nick Foles"));
         test.add(createBook("book1", "author1"));
         test.add(createBook("book2", "author2"));
         books = new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.books)));
@@ -88,8 +78,8 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
 
             }
         } else{
-            Log.d("hello", "got here");
             getSupportFragmentManager().beginTransaction().replace(R.id.layout, BookDetailsFragment.newInstanced(book)).addToBackStack(null).commit();
+
         }
     }
 
@@ -115,14 +105,6 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
         public int getCount() {
             return newBooks.size();
         }
-    }
-
-    //Method to create hashmap for book details
-    public HashMap createHashMap(String title, String author){
-        HashMap<Integer, String> hm = new HashMap<>();
-        hm.put(1, title);
-        hm.put(2, author);
-        return hm;
     }
 
     public Book createBook(String title, String author){
