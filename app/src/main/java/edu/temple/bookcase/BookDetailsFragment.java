@@ -2,12 +2,17 @@ package edu.temple.bookcase;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 
 public class BookDetailsFragment extends Fragment{
@@ -15,8 +20,10 @@ public class BookDetailsFragment extends Fragment{
     private static final String TITLE = "title";
     private static final String AUTHOR = "author";
     private static Book books;
+    static Book selected;
     private String book, title, author;
     TextView tv, tv1;
+    ImageView cover;
     private BookDetailsFragmentListener bd;
 
     public BookDetailsFragment(){
@@ -32,6 +39,7 @@ public class BookDetailsFragment extends Fragment{
     }
 
     public static BookDetailsFragment newInstanced(Book book){ //Old code disregard
+        selected = book;
         BookDetailsFragment fragment = new BookDetailsFragment();
         Bundle bundle = new Bundle();
         bundle.putParcelable(BOOK_TITLE, book);
@@ -53,15 +61,23 @@ public class BookDetailsFragment extends Fragment{
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
-        ViewGroup view = (ViewGroup) inflater.inflate(R.layout.book_details_fragment_activity, container, false);
-        tv = view.findViewById(R.id.book_title);
-        tv1 = view.findViewById(R.id.book_author);
+        ViewGroup view = (ViewGroup) inflater.inflate(R.layout.test, container, false);
+        tv = view.findViewById(R.id.textView);
+        tv1 = view.findViewById(R.id.textView2);
+        cover = view.findViewById(R.id.imageView);
         tv.setText(books.getTitle());
         tv1.setText(books.getAuthor());
+        Picasso.get().load(books.getCoverURL()).into(cover);
+
+
         return view;
     }
 
-
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable("Selected" ,selected);
+    }
 
     @Override
     public void onAttach(Context context){

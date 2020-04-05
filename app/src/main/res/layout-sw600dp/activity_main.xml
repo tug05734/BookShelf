@@ -10,19 +10,19 @@
     <FrameLayout
         android:id="@+id/book_list_view"
         android:name="edu.temple.bookcase.BookDetailsFragment"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="751dp"
+        android:layout_height="897dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/book_details_view"
+        app:layout_constraintHorizontal_weight=".35"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintHorizontal_weight=".35"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <FrameLayout
         android:id="@+id/book_details_view"
         android:name="edu.temple.bookcase.BookDetailsFragment"
-        android:layout_width="481dp"
-        android:layout_height="368dp"
+        android:layout_width="521dp"
+        android:layout_height="828dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_weight=".65"
@@ -34,8 +34,8 @@
         android:id="@+id/bookSearch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="73dp"
-        android:layout_marginTop="7dp"
+        android:layout_marginStart="36dp"
+        android:layout_marginTop="16dp"
         android:ems="10"
         android:inputType="textPersonName"
         android:text="Name"
@@ -46,8 +46,8 @@
         android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:layout_marginEnd="84dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="44dp"
         android:text="Search"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

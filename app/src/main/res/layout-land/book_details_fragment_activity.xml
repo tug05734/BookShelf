@@ -1,34 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:visibility="visible"
-    tools:visibility="visible">
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="114dp"
+        android:layout_height="106dp"
+        android:layout_alignParentLeft="false"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="94dp"
+        android:layout_marginBottom="88dp"
+        tools:srcCompat="@tools:sample/avatars" />
 
     <TextView
-        android:id="@+id/book_title"
-        android:layout_width="147dp"
-        android:layout_height="45dp"
-        android:layout_marginEnd="144dp"
-        android:layout_marginBottom="60dp"
-        android:gravity="center"
-        android:text=""
-        android:textSize="24sp"
-        app:layout_constraintBottom_toTopOf="@+id/book_author"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/imageView"
+        android:layout_centerHorizontal="false"
+        android:layout_marginRight="54dp"
+        android:layout_marginBottom="-86dp"
+        android:layout_toLeftOf="@id/imageView"
+        android:text="TextView" />
 
     <TextView
-        android:id="@+id/book_author"
-        android:layout_width="147dp"
-        android:layout_height="45dp"
-        android:layout_centerVertical="true"
-        android:layout_marginEnd="144dp"
-        android:layout_marginBottom="80dp"
-        android:gravity="center"
-        android:text="hello"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-</android.support.constraint.ConstraintLayout>
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/textView"
+        android:layout_centerHorizontal="false"
+        android:layout_marginRight="54dp"
+        android:layout_marginBottom="28dp"
+        android:layout_toLeftOf="@id/imageView"
+        android:text="TextView" />
+</RelativeLayout>
