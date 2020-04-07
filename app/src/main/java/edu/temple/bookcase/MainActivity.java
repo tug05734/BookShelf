@@ -1,32 +1,27 @@
 package edu.temple.bookcase;
 
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Handler;
 import android.os.Message;
-import android.service.autofill.TextValueSanitizer;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.lang.reflect.Array;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MainActivity extends AppCompatActivity implements BookListFragment.BookListFragmentListener, BookDetailsFragment.BookDetailsFragmentListener {
     private ViewPager vp;
@@ -40,21 +35,27 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
     JSONArray jsonArray = new JSONArray();
     Message msg;
     Book selected;
-    int x;
-    boolean orientationChange, startUp = true;
+    private static int x = -1;
+    boolean orientationChange;
+    Book startUpBook = new Book(0, "", "", "");
+    private static int u = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Bundle info = new Bundle();
         setContentView(R.layout.activity_main);
         bookSearch = findViewById(R.id.bookSearch);
-
-        Log.d("hello", "onCreate: 1 ");
+        boolean startUp = true;
+        AtomicInteger num = new AtomicInteger(0 );
         findViewById(R.id.button).setOnClickListener(v -> {
+            u = 1;
+            num.getAndIncrement();
+            info.putInt("startUp", num.get());
+            Log.d("raz", "onCreate: " + (u));
             new Thread() {
                 @Override
-                public void run() {
-                    startUp = false;
+                public void run() { ;
                     try {
                         Log.d("hello", "onCreate: 2 ");
                         if (bookSearch.getText().toString().isEmpty())
@@ -77,7 +78,17 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
         });
 
 
-        if(savedInstanceState != null ){
+
+        int h = info.getInt("startUp");
+        Log.d("raz", String.valueOf(u));
+
+
+        if (checkTablet() || getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE && u == 0) {
+            startUp = false;
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.book_details_view, BookDetailsFragment.newInstanced(startUpBook)).addToBackStack(null)
+                    .commit();
+        } else if(savedInstanceState != null && u != 0){
             orientationChange = true;
             bookSearch.setText(savedInstanceState.getString("Search"));
             String contents = savedInstanceState.getString("SearchResult");
@@ -114,6 +125,7 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
 
     */
     }
+
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -157,10 +169,11 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
     }
 
     @Override
-    public void selectedBook(Book book, int position) {
+    public void selectedBook(Book book, int position, ArrayList<Book> books) {
         displayBook(book);
-        selected = book;
+        test = books;
         x = position;
+        Log.d("raz", test.toString());
     }
 
     Handler booksHandler = new Handler(new Handler.Callback() {
@@ -178,21 +191,36 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
                     books.add(book);
                 }
                 if (checkTablet() || getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                    if(x != -1) {
                         getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.book_list_view, BookListFragment.newInstanced(books)).addToBackStack(null)
-                                .replace(R.id.book_details_view, BookDetailsFragment.newInstanced(books.get(0))).addToBackStack(null)
+                                .replace(R.id.book_list_view, BookListFragment.newInstanced(books))
+                                .replace(R.id.book_details_view, BookDetailsFragment.newInstanced(books.get(x))).addToBackStack(null)
                                 .commit();
+                    } else {
+                        getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.book_list_view, BookListFragment.newInstanced(books))
+                                .replace(R.id.book_details_view, BookDetailsFragment.newInstanced(startUpBook)).addToBackStack(null)
+                                .commit();
+                    }
+
 
                 } else {
-                    isPortrait = true;
-                    getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.layout, BookListFragment.newInstanced(books))
-                            .commit();
+                    if(x == -1) {
+                        getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.layout, BookListFragment.newInstanced(books))
+                                .commit();
+                    }else {
+                        getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.layout, BookDetailsFragment.newInstanced(books.get(x))).addToBackStack(null)
+                                .commit();
+                    }
                 }
 
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+
+            x = -1;
             return false;
         }
     });
@@ -201,5 +229,7 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
         Book book = new Book(0, title, author, "url");
         return book;
     }
+
+
 }
 

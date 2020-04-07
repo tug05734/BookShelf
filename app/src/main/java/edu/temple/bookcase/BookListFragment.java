@@ -80,6 +80,7 @@ public class BookListFragment extends Fragment {
 
                 */
 
+
                 return view;
             }
         };
@@ -88,10 +89,11 @@ public class BookListFragment extends Fragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                bl.selectedBook(books.get(i), i); //When user clicks on listview element
+                bl.selectedBook(books.get(i), i, books); //When user clicks on listview element
                 Log.d("raz", String.valueOf(i));
             }
         });
+        //arrayAdapter.notifyDataSetChanged();
 
         return view;
     }
@@ -115,6 +117,6 @@ public class BookListFragment extends Fragment {
 
 
     public interface BookListFragmentListener{
-        void selectedBook(Book book, int position);
+        void selectedBook(Book book, int position, ArrayList<Book> books);
     }
 }
