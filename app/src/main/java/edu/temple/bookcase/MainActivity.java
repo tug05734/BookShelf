@@ -4,13 +4,9 @@ import android.content.res.Configuration;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
-import android.util.Log;
-import android.widget.Button;
 import android.widget.EditText;
 
 import org.json.JSONArray;
@@ -20,54 +16,36 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class MainActivity extends AppCompatActivity implements BookListFragment.BookListFragmentListener, BookDetailsFragment.BookDetailsFragmentListener {
-    private ViewPager vp;
-    ArrayList<HashMap<Integer, String>> newBooks = new ArrayList<>();
     ArrayList<Book> books;
-    ArrayList<Book> test = new ArrayList<Book>();
-    private PagerAdapter pa;
-    private boolean isPortrait;
     EditText bookSearch;
     URL website;
     JSONArray jsonArray = new JSONArray();
     Message msg;
-    Book selected;
-    private static int x = -1;
-    boolean orientationChange;
-    Book startUpBook = new Book(0, "", "", "");
-    private static int u = 0;
+    private static int selectedBookPosition = -1; //Holds the position of the book in list view returned by selectedBook()
+    Book startUpBook = new Book(0, "", "", ""); //Used to avoid crashes
+    private static int startUp = 0; // 0 - app is initially launched; 1 - app is not in start up (the first search has been made)
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Bundle info = new Bundle();
         setContentView(R.layout.activity_main);
         bookSearch = findViewById(R.id.bookSearch);
-        boolean startUp = true;
-        AtomicInteger num = new AtomicInteger(0 );
-        findViewById(R.id.button).setOnClickListener(v -> {
-            u = 1;
-            num.getAndIncrement();
-            info.putInt("startUp", num.get());
-            Log.d("raz", "onCreate: " + (u));
+        findViewById(R.id.button).setOnClickListener(v -> { //When search is clicked, app will return list of books matching the search parameter
+            startUp = 1; //Lets program know that the first search has been made and app is no longer in start up
             new Thread() {
                 @Override
-                public void run() { ;
+                public void run() { //Queries the search
                     try {
-                        Log.d("hello", "onCreate: 2 ");
                         if (bookSearch.getText().toString().isEmpty())
                             website = new URL("https://kamorris.com/lab/abp/booksearch.php");
                         else
                             website = new URL("https://kamorris.com/lab/abp/booksearch.php?search=" + bookSearch.getText().toString());
                         BufferedReader reader = new BufferedReader(new InputStreamReader(website.openStream()));
                         String jL = reader.readLine();
-                        //Log.d("hello", jL);
                         jsonArray = new JSONArray(jL);
                         msg = Message.obtain();
-                        //savedInstanceState.putString("Search", bookSearch.getText().toString());
                         msg.obj = jsonArray;
                         booksHandler.sendMessage(msg);
                     } catch (Exception e) {
@@ -77,19 +55,12 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
             }.start();
         });
 
-
-
-        int h = info.getInt("startUp");
-        Log.d("raz", String.valueOf(u));
-
-
-        if (checkTablet() || getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE && u == 0) {
-            startUp = false;
+        //Checks if app is in orientation and if it in start up, if so returns book details fragment with an empty book to avoid crash
+        if (checkTablet() || getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE && startUp == 0) {
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.book_details_view, BookDetailsFragment.newInstanced(startUpBook)).addToBackStack(null)
+                    .replace(R.id.book_details_view, BookDetailsFragment.newInstance(startUpBook)).addToBackStack(null)
                     .commit();
-        } else if(savedInstanceState != null && u != 0){
-            orientationChange = true;
+        } else if(savedInstanceState != null && startUp != 0){ //If activity has restarted and a search has been made
             bookSearch.setText(savedInstanceState.getString("Search"));
             String contents = savedInstanceState.getString("SearchResult");
             try {
@@ -100,35 +71,12 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            //displayBook(selected);
         }
-
-
-
-
-   /*     Log.d("hello", "It got here 11");
-        test.add(createBook("book1", "author1"));
-        test.add(createBook("book2", "author2"));
-        //books = new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.books)));
-        if (checkTablet() || getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            Log.d("hello", "It got here 1");
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.book_list_view, BookListFragment.newInstanced(test))
-                    .replace(R.id.book_details_view, BookDetailsFragment.newInstanced(test.get(0)))
-                    .commit();
-        } else {
-            isPortrait = true;
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.layout, BookListFragment.newInstanced(test))
-                    .commit();
-        }
-
-    */
     }
 
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    protected void onSaveInstanceState(Bundle outState) { //Saves the search and search results when on restart
         super.onSaveInstanceState(outState);
         outState.putString("Search", bookSearch.getText().toString());
         outState.putString("SearchResult", jsonArray.toString());
@@ -145,35 +93,23 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
         return screenDiagonal >= 7.0;
     }
 
-    //Method that will display chosen book in a BookDetailsFragment
+    //Method that will display chosen book from list view
     @Override
     public void displayBook(Book book) {
         if (checkTablet() || getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) { //Checks to see if in landscape mode/tablet or portrait
             Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.book_details_view);
             if (fragment != null && fragment.getView() != null) {
-                getSupportFragmentManager().beginTransaction().replace(R.id.book_details_view, BookDetailsFragment.newInstanced(book)).commit();
-
-            /*    TextView tv = fragment.getView().findViewById(R.id.book_title);
-                TextView tv1 = fragment.getView().findViewById(R.id.book_author);
-                Log.d("hello", String.valueOf(tv1.getLeft()) + "    " + tv1.getTop());
-                tv.setText(title);
-                tv1.setText(author);
-
-                */
-
+                getSupportFragmentManager().beginTransaction().replace(R.id.book_details_view, BookDetailsFragment.newInstance(book)).commit();
             }
         } else{
-            getSupportFragmentManager().beginTransaction().replace(R.id.layout, BookDetailsFragment.newInstanced(book)).addToBackStack(null).commit();
-
+            getSupportFragmentManager().beginTransaction().replace(R.id.layout, BookDetailsFragment.newInstance(book)).addToBackStack(null).commit();
         }
     }
 
     @Override
-    public void selectedBook(Book book, int position, ArrayList<Book> books) {
+    public void selectedBook(Book book, int position) {
         displayBook(book);
-        test = books;
-        x = position;
-        Log.d("raz", test.toString());
+        selectedBookPosition = position; //Position of book in list view
     }
 
     Handler booksHandler = new Handler(new Handler.Callback() {
@@ -182,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
             JSONArray jsonArray = (JSONArray) msg.obj;
             Book book;
             books = new ArrayList<>();
-            try{
+            try{                            // Adds contents of json array into an array list of books
                 for(int i = 0; i < jsonArray.length(); i++){
                     book = new Book(jsonArray.getJSONObject(i).getInt("book_id"),
                             jsonArray.getJSONObject(i).getString("title"),
@@ -190,28 +126,31 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
                             jsonArray.getJSONObject(i).getString("cover_url"));
                     books.add(book);
                 }
-                if (checkTablet() || getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                    if(x != -1) {
+                if (checkTablet() || getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) { //If in landscape
+                    if(selectedBookPosition != -1) { //If a book has been selected from list view
                         getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.book_list_view, BookListFragment.newInstanced(books))
-                                .replace(R.id.book_details_view, BookDetailsFragment.newInstanced(books.get(x))).addToBackStack(null)
+                                .replace(R.id.book_list_view, BookListFragment.newInstance(books))
+                                .replace(R.id.book_details_view, BookDetailsFragment.newInstance(books.get(selectedBookPosition)))//Shows the book currently selected
                                 .commit();
-                    } else {
+                    } else { //If book has not been selected
                         getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.book_list_view, BookListFragment.newInstanced(books))
-                                .replace(R.id.book_details_view, BookDetailsFragment.newInstanced(startUpBook)).addToBackStack(null)
+                                .replace(R.id.book_list_view, BookListFragment.newInstance(books))
+                                .replace(R.id.book_details_view, BookDetailsFragment.newInstance(startUpBook)) //Shows an empty book to avoid crash
                                 .commit();
                     }
 
 
                 } else {
-                    if(x == -1) {
+                    if(selectedBookPosition == -1) { //If no book has been currently selected
                         getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.layout, BookListFragment.newInstanced(books))
+                                .replace(R.id.layout, BookListFragment.newInstance(books))
                                 .commit();
-                    }else {
-                        getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.layout, BookDetailsFragment.newInstanced(books.get(x))).addToBackStack(null)
+                    }else { //If a book has been selected
+                        getSupportFragmentManager().beginTransaction() //Updates BookListFragment first
+                                .replace(R.id.layout, BookListFragment.newInstance(books))
+                                .commit();
+                        getSupportFragmentManager().beginTransaction() //Then displays the current book in BookDetailsFragment
+                                .replace(R.id.layout, BookDetailsFragment.newInstance(books.get(selectedBookPosition))).addToBackStack(null)
                                 .commit();
                     }
                 }
@@ -220,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
                 e.printStackTrace();
             }
 
-            x = -1;
+            selectedBookPosition = -1; //Returns the selected book position to not selected
             return false;
         }
     });

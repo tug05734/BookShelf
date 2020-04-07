@@ -38,7 +38,7 @@
         android:layout_marginTop="7dp"
         android:ems="10"
         android:inputType="textPersonName"
-        android:text="Name"
+        android:hint="Title, Author"
         app:layout_constraintStart_toEndOf="@+id/book_list_view"
         app:layout_constraintTop_toTopOf="parent" />
 

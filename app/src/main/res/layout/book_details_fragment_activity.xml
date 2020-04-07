@@ -12,7 +12,7 @@
         tools:srcCompat="@tools:sample/avatars" />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/book_author"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@id/imageView"
@@ -21,10 +21,10 @@
         android:text="TextView" />
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/book_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@id/textView"
+        android:layout_above="@id/book_author"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="28dp"
         android:text="TextView" />

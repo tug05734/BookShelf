@@ -1,35 +1,21 @@
 package edu.temple.bookcase;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-
-import org.w3c.dom.Text;
-
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 
 public class BookListFragment extends Fragment {
 
-    //private ArrayList<String> books;
     private static final String BOOK_LIST = "key";
-    private static final String TITLE = "title";
-    private static final String AUTHOR = "author";
-    private static final String HASHMAP = "hashmap";
-    ArrayList<HashMap<Integer, String>> newBooks = new ArrayList<>();
     ArrayList<Book> books;
-    String book, title, author;
     ListView listView;
     private BookListFragmentListener bl;
 
@@ -37,7 +23,7 @@ public class BookListFragment extends Fragment {
 
     }
 
-    public static BookListFragment newInstanced(ArrayList<Book> books){ //Old code disregard
+    public static BookListFragment newInstance(ArrayList<Book> books){
         BookListFragment blFragment = new BookListFragment();
         Bundle bundle = new Bundle();
         bundle.putParcelableArrayList(BOOK_LIST, books);
@@ -50,50 +36,30 @@ public class BookListFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if(getArguments() != null){
             books = getArguments().getParcelableArrayList(BOOK_LIST);
-            //title = getArguments().getString(TITLE);
-            //author = getArguments().getString(AUTHOR);
-           // newBooks = (ArrayList<HashMap<Integer, String>>)getArguments().getSerializable(HASHMAP); //Stores the hashmap from bundle to newBooks
-            Log.d("hello", "It got here 3");
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
         ViewGroup view = (ViewGroup) inflater.inflate(R.layout.book_list_fragment_activity, container, false);
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter(view.getContext(), android.R.layout.simple_list_item_2, android.R.id.text1 ,books){
+        ArrayAdapter arrayAdapter = new ArrayAdapter(view.getContext(), android.R.layout.simple_list_item_2, android.R.id.text1 ,books){
             @Override
-            public View getView(int position, View convertView, ViewGroup parent){ //Populates the list view with the book details from the hashmap
+            public View getView(int position, View convertView, ViewGroup parent){
                 View view = super.getView(position,convertView, parent);
-                TextView text1 = (TextView) view.findViewById(android.R.id.text1);
-                TextView text2 = (TextView) view.findViewById(android.R.id.text2);
-                Log.d("hello", "It got here 4");
+                TextView text1 = view.findViewById(android.R.id.text1);
+                TextView text2 = view.findViewById(android.R.id.text2);
                 text1.setText(books.get(position).getTitle());
                 text2.setText(books.get(position).getAuthor());
-                Log.d("hello", "It got here 5");
-               /* while(newBooks.iterator().hasNext()){
-                    text1.setText(newBooks.get(i).get(1));
-                    text2.setText(newBooks.get(i).get(2));
-                    Log.d("hello", "key: " + String.valueOf(newBooks.get(1)) + " value = " + String.valueOf(newBooks.get(2)));
-                    Log.d("hello", "key: " + String.valueOf(newBooks.get(1)) + " value = " + String.valueOf(newBooks.get(2)));
-                    i++;
-                }
-
-                */
-
+                text2.setTextColor(Color.DKGRAY);
 
                 return view;
             }
         };
         listView = view.findViewById(R.id.book_list);
         listView.setAdapter(arrayAdapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                bl.selectedBook(books.get(i), i, books); //When user clicks on listview element
-                Log.d("raz", String.valueOf(i));
-            }
+        listView.setOnItemClickListener((adapterView, view1, i, l) -> {
+            bl.selectedBook(books.get(i), i); //When user clicks on list view element
         });
-        //arrayAdapter.notifyDataSetChanged();
 
         return view;
     }
@@ -117,6 +83,6 @@ public class BookListFragment extends Fragment {
 
 
     public interface BookListFragmentListener{
-        void selectedBook(Book book, int position, ArrayList<Book> books);
+        void selectedBook(Book book, int position);
     }
 }
