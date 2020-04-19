@@ -49,8 +49,6 @@ public class BookDetailsFragment extends Fragment{
         cover = view.findViewById(R.id.imageView);
         tv.setText(books.getTitle());
         tv1.setText(books.getAuthor());
-        tv.setTextSize(16);
-        tv1.setTextSize(14);
         if(!books.getCoverURL().isEmpty())
             Picasso.get().load(books.getCoverURL()).into(cover);
 
