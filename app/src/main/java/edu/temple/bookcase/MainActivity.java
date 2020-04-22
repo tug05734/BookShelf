@@ -1,13 +1,19 @@
 package edu.temple.bookcase;
 
+import android.content.ComponentName;
+import android.content.ServiceConnection;
 import android.content.res.Configuration;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.SeekBar;
+import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -17,6 +23,10 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 
+import edu.temple.audiobookplayer.AudiobookService;
+
+import static android.view.View.GONE;
+
 public class MainActivity extends AppCompatActivity implements BookListFragment.BookListFragmentListener, BookDetailsFragment.BookDetailsFragmentListener {
     ArrayList<Book> books;
     EditText bookSearch;
@@ -24,8 +34,37 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
     JSONArray jsonArray = new JSONArray();
     Message msg;
     private static int selectedBookPosition = -1; //Holds the position of the book in list view returned by selectedBook()
-    Book startUpBook = new Book(0, "", "", ""); //Used to avoid crashes
+    Book startUpBook = new Book(0, "", "", "", 0); //Used to avoid crashes
     private static int startUp = 0; // 0 - app is initially launched; 1 - app is not in start up (the first search has been made)
+    boolean serviceConnected;
+    AudiobookService.MediaControlBinder audioService;
+    AudiobookService.BookProgress nowPlaying;
+    SeekBar seekBar;
+    TextView nowPlayingTV, bookTitleTV, currentPercentageTV;
+    Button pause, stop;
+
+
+    ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            audioService = (AudiobookService.MediaControlBinder) service;
+            audioService.setProgressHandler(new Handler(msg -> {
+                nowPlaying = (AudiobookService.BookProgress) msg.obj;
+                if(audioService.isPlaying()){
+                    seekBar.setProgress(nowPlaying.getProgress());
+                }
+                return false;
+            }));
+            serviceConnected = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            serviceConnected = false;
+        }
+    };
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +111,45 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
                 e.printStackTrace();
             }
         }
+
+        nowPlayingTV = findViewById(R.id.NowPlaying);
+        bookTitleTV = findViewById(R.id.BookTitle);
+        currentPercentageTV = findViewById(R.id.currentPercentage);
+        seekBar = findViewById(R.id.seekBar);
+        nowPlayingTV.setVisibility(GONE);
+        bookTitleTV.setVisibility(GONE);
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if(fromUser){
+                    //Add code for seeking to position of playing book
+                }
+                currentPercentageTV.setText(String.valueOf(progress));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        pause = findViewById(R.id.pauseButton);
+        pause.setOnClickListener(v -> {
+            if(serviceConnected){
+                //if book is playing, then pause book and set text to resume
+                //else play book and set text to pause
+            }
+        });
+
+        stop = findViewById(R.id.stopButton);
+        stop.setOnClickListener(v -> {
+            //Stop the audio, set seek bar to 0
+        });
     }
 
 
@@ -123,7 +201,8 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
                     book = new Book(jsonArray.getJSONObject(i).getInt("book_id"),
                             jsonArray.getJSONObject(i).getString("title"),
                             jsonArray.getJSONObject(i).getString("author"),
-                            jsonArray.getJSONObject(i).getString("cover_url"));
+                            jsonArray.getJSONObject(i).getString("cover_url"),
+                            jsonArray.getJSONObject(i).getInt("duration"));
                     books.add(book);
                 }
                 if (checkTablet() || getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) { //If in landscape
@@ -165,7 +244,7 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
     });
 
     public Book createBook(String title, String author){
-        Book book = new Book(0, title, author, "url");
+        Book book = new Book(0, title, author, "url", 0);
         return book;
     }
 

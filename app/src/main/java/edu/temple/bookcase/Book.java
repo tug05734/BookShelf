@@ -5,14 +5,15 @@ import android.os.Parcelable;
 
 public class Book implements Parcelable {
 
-    private int id, published;
+    private int id, published, duration;
     private String title, author, coverURL;
 
-    public Book(int id, String title, String author, String coverURL){
+    public Book(int id, String title, String author, String coverURL, int duration){
         this.id = id;
         this.title = title;
         this.author = author;
         this.coverURL = coverURL;
+        this.duration = duration;
     }
 
     public int getId() {
@@ -55,12 +56,14 @@ public class Book implements Parcelable {
         this.coverURL = coverURL;
     }
 
+    public int getDuration(){return duration;};
+
     private Book(Parcel in){
         id = in.readInt();
-        published = in.readInt();
         title = in.readString();
         author = in.readString();
         coverURL = in.readString();
+        duration = in.readInt();
     }
 
     public static final Creator<Book> CREATOR = new Creator<Book>() {
@@ -82,6 +85,10 @@ public class Book implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-
+        dest.writeInt(id);
+        dest.writeString(title);
+        dest.writeString(author);
+        dest.writeString(coverURL);
+        dest.writeInt(duration);
     }
 }
