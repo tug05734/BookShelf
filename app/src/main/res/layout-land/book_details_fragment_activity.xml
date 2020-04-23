@@ -36,4 +36,16 @@
         android:layout_marginBottom="28dp"
         android:layout_toLeftOf="@id/imageView"
         android:text="TextView" />
+
+    <Button
+        android:id="@+id/playButton"
+        android:layout_width="49dp"
+        android:layout_height="33dp"
+        android:layout_above="@id/book_title"
+        android:layout_alignStart="@id/book_title"
+        android:layout_marginLeft="11dp"
+        android:layout_marginTop="48dp"
+        android:text="PLAY"
+        android:textSize="6sp" />
+
 </RelativeLayout>

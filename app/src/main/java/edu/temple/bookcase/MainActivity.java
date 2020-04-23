@@ -1,6 +1,8 @@
 package edu.temple.bookcase;
 
 import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.res.Configuration;
 import android.os.Handler;
@@ -10,6 +12,8 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SeekBar;
@@ -21,6 +25,7 @@ import org.json.JSONException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import edu.temple.audiobookplayer.AudiobookService;
@@ -42,6 +47,7 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
     SeekBar seekBar;
     TextView nowPlayingTV, bookTitleTV, currentPercentageTV;
     Button pause, stop;
+    static Book currentBook;
 
 
     ServiceConnection serviceConnection = new ServiceConnection() {
@@ -63,6 +69,20 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
             serviceConnected = false;
         }
     };
+
+    @Override
+    public void onStart(){
+        super.onStart();
+        Intent intent = new Intent(this, AudiobookService.class);
+        bindService(intent, serviceConnection, Context.BIND_NOT_FOREGROUND);
+        startService(intent);
+    }
+
+    @Override
+    public void onStop(){
+        super.onStop();
+        unbindService(serviceConnection);
+    }
 
 
 
@@ -122,9 +142,11 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if(fromUser){
-                    //Add code for seeking to position of playing book
+                    audioService.seekTo(seekBar.getProgress());
                 }
-                currentPercentageTV.setText(String.valueOf(progress));
+                double bookProgress = ((double)progress / currentBook.getDuration()) * 100;
+                DecimalFormat df = new DecimalFormat("#0");
+                currentPercentageTV.setText(df.format(bookProgress));
             }
 
             @Override
@@ -141,6 +163,13 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
         pause = findViewById(R.id.pauseButton);
         pause.setOnClickListener(v -> {
             if(serviceConnected){
+                if(audioService.isPlaying()){
+                    audioService.pause();
+                    pause.setText("RESUME");
+                } else{
+                    audioService.pause();
+                    pause.setText("PAUSE");
+                }
                 //if book is playing, then pause book and set text to resume
                 //else play book and set text to pause
             }
@@ -148,6 +177,12 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
 
         stop = findViewById(R.id.stopButton);
         stop.setOnClickListener(v -> {
+            if(serviceConnected){
+                audioService.stop();
+                seekBar.setProgress(0);
+                nowPlayingTV.setVisibility(View.INVISIBLE);
+                bookTitleTV.setVisibility(View.INVISIBLE);
+            }
             //Stop the audio, set seek bar to 0
         });
     }
@@ -188,6 +223,7 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
     public void selectedBook(Book book, int position) {
         displayBook(book);
         selectedBookPosition = position; //Position of book in list view
+        currentBook = book;
     }
 
     Handler booksHandler = new Handler(new Handler.Callback() {
@@ -242,6 +278,15 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
             return false;
         }
     });
+
+    @Override
+    public void playAudio(Book book){
+        seekBar.setMax(book.getDuration());
+        audioService.play(book.getId());
+        bookTitleTV.setText(book.getTitle());
+        nowPlayingTV.setVisibility(View.VISIBLE);
+        bookTitleTV.setVisibility(View.VISIBLE);
+    }
 
     public Book createBook(String title, String author){
         Book book = new Book(0, title, author, "url", 0);

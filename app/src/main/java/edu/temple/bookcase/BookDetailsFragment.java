@@ -51,6 +51,7 @@ public class BookDetailsFragment extends Fragment{
         tv1.setText(books.getAuthor());
         if(!books.getCoverURL().isEmpty())
             Picasso.get().load(books.getCoverURL()).into(cover);
+        view.findViewById(R.id.playButton).setOnClickListener(v -> {bd.playAudio(books);});
 
         return view;
     }
@@ -76,6 +77,7 @@ public class BookDetailsFragment extends Fragment{
 
     public interface BookDetailsFragmentListener{
         void displayBook(Book book);
+        void playAudio(Book book);
     }
 
 }
