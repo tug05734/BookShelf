@@ -114,6 +114,13 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
             }.start();
         });
 
+        nowPlayingTV = findViewById(R.id.NowPlaying);
+        bookTitleTV = findViewById(R.id.BookTitle);
+        currentPercentageTV = findViewById(R.id.currentPercentage);
+        seekBar = findViewById(R.id.seekBar);
+        nowPlayingTV.setVisibility(GONE);
+        bookTitleTV.setVisibility(GONE);
+
         //Checks if app is in orientation and if it in start up, if so returns book details fragment with an empty book to avoid crash
         if (checkTablet() || getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE && startUp == 0) {
             getSupportFragmentManager().beginTransaction()
@@ -122,6 +129,10 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
         } else if(savedInstanceState != null && startUp != 0){ //If activity has restarted and a search has been made
             bookSearch.setText(savedInstanceState.getString("Search"));
             String contents = savedInstanceState.getString("SearchResult");
+            int progress = savedInstanceState.getInt("BookProgress");
+            boolean isPlaying = savedInstanceState.getBoolean("IsPlaying");
+            int max = savedInstanceState.getInt("BookLength");
+            String title = savedInstanceState.getString("BookTitle") ;
             try {
                 jsonArray = new JSONArray(contents);
                 msg = Message.obtain();
@@ -130,23 +141,42 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+            if(isPlaying && currentBook != null){
+                seekBar = findViewById(R.id.seekBar);
+                nowPlayingTV = findViewById(R.id.NowPlaying);
+                bookTitleTV = findViewById(R.id.BookTitle);
+                currentPercentageTV = findViewById(R.id.currentPercentage);
+                seekBar.setMax(max);
+                seekBar.setProgress(progress);
+                bookTitleTV.setText(title);
+                bookTitleTV.setVisibility(View.VISIBLE);
+                nowPlayingTV.setVisibility(View.VISIBLE);
+                double bookProgress = ((double)progress / max) * 100;
+                DecimalFormat df = new DecimalFormat("#0");
+                currentPercentageTV.setText(df.format(bookProgress));
+            }
         }
 
-        nowPlayingTV = findViewById(R.id.NowPlaying);
-        bookTitleTV = findViewById(R.id.BookTitle);
-        currentPercentageTV = findViewById(R.id.currentPercentage);
-        seekBar = findViewById(R.id.seekBar);
-        nowPlayingTV.setVisibility(GONE);
-        bookTitleTV.setVisibility(GONE);
+
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if(fromUser){
-                    audioService.seekTo(seekBar.getProgress());
+                    if(currentBook != null && serviceConnected) {
+                        audioService.seekTo(seekBar.getProgress());
+                        double bookProgress = ((double)progress / currentBook.getDuration()) * 100;
+                        DecimalFormat df = new DecimalFormat("#0");
+                        currentPercentageTV.setText(df.format(bookProgress));
+                    } else{
+                        seekBar.setProgress(0);
+                        currentPercentageTV.setText(String.valueOf(0));
+                    }
+                }else{
+                    double bookProgress = ((double)progress / currentBook.getDuration()) * 100;
+                    DecimalFormat df = new DecimalFormat("#0");
+                    currentPercentageTV.setText(df.format(bookProgress));
                 }
-                double bookProgress = ((double)progress / currentBook.getDuration()) * 100;
-                DecimalFormat df = new DecimalFormat("#0");
-                currentPercentageTV.setText(df.format(bookProgress));
+
             }
 
             @Override
@@ -177,9 +207,10 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
 
         stop = findViewById(R.id.stopButton);
         stop.setOnClickListener(v -> {
-            if(serviceConnected){
+            if(serviceConnected && audioService.isPlaying()){
                 audioService.stop();
                 seekBar.setProgress(0);
+                currentPercentageTV.setText(String.valueOf(0));
                 nowPlayingTV.setVisibility(View.INVISIBLE);
                 bookTitleTV.setVisibility(View.INVISIBLE);
             }
@@ -193,6 +224,10 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
         super.onSaveInstanceState(outState);
         outState.putString("Search", bookSearch.getText().toString());
         outState.putString("SearchResult", jsonArray.toString());
+        outState.putInt("BookProgress", seekBar.getProgress());
+        outState.putBoolean("IsPlaying", audioService.isPlaying());
+        outState.putInt("BookLength", currentBook.getDuration());
+        outState.putString("BookTitle", currentBook.getTitle());
     }
 
     //Not my code
