@@ -151,7 +151,7 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
                 bookTitleTV.setText(title);
                 bookTitleTV.setVisibility(View.VISIBLE);
                 nowPlayingTV.setVisibility(View.VISIBLE);
-                double bookProgress = ((double)progress / max) * 100;
+                double bookProgress = ((double)seekBar.getProgress() / max) * 100;
                 DecimalFormat df = new DecimalFormat("#0");
                 currentPercentageTV.setText(df.format(bookProgress));
             }
@@ -176,7 +176,6 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
                     DecimalFormat df = new DecimalFormat("#0");
                     currentPercentageTV.setText(df.format(bookProgress));
                 }
-
             }
 
             @Override
@@ -207,7 +206,7 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
 
         stop = findViewById(R.id.stopButton);
         stop.setOnClickListener(v -> {
-            if(serviceConnected && audioService.isPlaying()){
+            if(serviceConnected){
                 audioService.stop();
                 seekBar.setProgress(0);
                 currentPercentageTV.setText(String.valueOf(0));
@@ -226,8 +225,10 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
         outState.putString("SearchResult", jsonArray.toString());
         outState.putInt("BookProgress", seekBar.getProgress());
         outState.putBoolean("IsPlaying", audioService.isPlaying());
-        outState.putInt("BookLength", currentBook.getDuration());
-        outState.putString("BookTitle", currentBook.getTitle());
+        if(currentBook != null) {
+            outState.putInt("BookLength", currentBook.getDuration());
+            outState.putString("BookTitle", currentBook.getTitle());
+        }
     }
 
     //Not my code
@@ -258,7 +259,6 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
     public void selectedBook(Book book, int position) {
         displayBook(book);
         selectedBookPosition = position; //Position of book in list view
-        currentBook = book;
     }
 
     Handler booksHandler = new Handler(new Handler.Callback() {
@@ -316,6 +316,7 @@ public class MainActivity extends AppCompatActivity implements BookListFragment.
 
     @Override
     public void playAudio(Book book){
+        currentBook = book;
         seekBar.setMax(book.getDuration());
         audioService.play(book.getId());
         bookTitleTV.setText(book.getTitle());
